@@ -1,0 +1,41 @@
+package have.somuch.regsys.system.entity;
+
+import com.baomidou.mybatisplus.annotation.TableName;
+import have.somuch.regsys.common.common.BaseEntity;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.Accessors;
+
+/**
+ * <p>
+ * 岗位表
+ * </p>
+ *
+ * @author 鲲鹏
+ * @since 2020-11-02
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@Accessors(chain = true)
+@TableName("sys_position")
+public class Position extends BaseEntity {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 岗位名称
+     */
+    private String name;
+
+    /**
+     * 状态：1正常 2停用
+     */
+    private Integer status;
+
+    /**
+     * 显示顺序
+     */
+    private Integer sort;
+
+
+}
