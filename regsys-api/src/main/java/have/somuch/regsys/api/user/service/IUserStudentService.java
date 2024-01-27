@@ -1,6 +1,6 @@
 package have.somuch.regsys.api.user.service;
 
-import utils.have.somuch.regsys.common.JsonResult;
+import have.somuch.regsys.common.utils.JsonResult;
 import have.somuch.regsys.api.user.entity.UserStudent;
 import have.somuch.regsys.common.common.IBaseService;
 

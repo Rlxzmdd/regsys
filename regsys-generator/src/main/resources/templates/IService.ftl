@@ -1,6 +1,6 @@
 package ${packageName}.service;
 
-import utils.have.somuch.regsys.common.JsonResult;
+import have.somuch.regsys.common.utils.JsonResult;
 import ${packageName}.entity.${entityName};
 import have.somuch.regsys.common.common.IBaseService;
 
