@@ -1,6 +1,6 @@
 package ${packageName}.query;
 
-import common.have.somuch.regsys.common.BaseQuery;
+import have.somuch.regsys.common.common.BaseQuery;
 import lombok.Data;
 
 /**

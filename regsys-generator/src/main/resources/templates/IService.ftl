@@ -2,7 +2,7 @@ package ${packageName}.service;
 
 import utils.have.somuch.regsys.common.JsonResult;
 import ${packageName}.entity.${entityName};
-import common.have.somuch.regsys.common.IBaseService;
+import have.somuch.regsys.common.common.IBaseService;
 
 /**
  * <p>

@@ -1,7 +1,7 @@
 package ${packageName}.controller;
 
-import enums.have.somuch.regsys.common.LogType;
-import common.have.somuch.regsys.common.BaseController;
+import have.somuch.regsys.common.enums.LogType;
+import have.somuch.regsys.common.common.BaseController;
 import ${packageName}.entity.${entityName};
 import ${packageName}.query.${entityName}Query;
 import ${packageName}.service.I${entityName}Service;

@@ -3,7 +3,7 @@ package ${packageName}.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import common.have.somuch.regsys.common.BaseEntity;
+import have.somuch.regsys.common.common.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
