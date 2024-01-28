@@ -12,5 +12,7 @@ public enum LoginType {
     /**
      * 教师工号登录,number、password
      */
-    TCH_NUMBER
+    TCH_NUMBER,
+
+    UNKNOWN
 }

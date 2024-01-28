@@ -178,6 +178,7 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
         }
         // todo 准考证登录似乎没有会number，需要复查
         String jwtToken = jwtUtil.sign(dto.getNumber(), type);
+        // todo token为null
         return JsonResultS.success(new HashMap<String, String>() {{
             put("authorization", jwtToken);
         }});
