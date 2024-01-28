@@ -2,6 +2,7 @@ package have.somuch.regsys.api.user.controller;
 
 import have.somuch.regsys.api.common.dto.AuthToken2CredentialDto;
 import have.somuch.regsys.api.common.utils.JwtUtil;
+import have.somuch.regsys.api.user.dto.WechatLoginDto;
 import have.somuch.regsys.api.user.entity.UserWechat;
 import have.somuch.regsys.api.user.query.UserWechatQuery;
 import have.somuch.regsys.api.user.service.IUserWechatService;
@@ -61,7 +62,7 @@ public class UserWechatController extends BaseController {
     /**
      * 获取详情
      *
-     * @param userwechatId 记录ID
+     * @param userWechatId 记录ID
      * @return
      */
     @GetMapping("/info/{userwechatId}")
@@ -96,16 +97,15 @@ public class UserWechatController extends BaseController {
     }
 
     /**
-     * 小程序用户绑定openid
+     * 小程序用户登录信息，同时绑定用户，
      *
      * @param code  小程序code
-     * @param token 用户Token
+     * @param dto   通过springboot自动注入的请求头，详情见dto类
      * @return
      */
-    @PostMapping("/bind")
-    public JsonResultS bind(String code, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
-        AuthToken2CredentialDto dto = AuthToken2CredentialDto.create(jwtUtil, token);
-        return userWechatService.bind(code, dto );
+    @PostMapping("/login")
+    public JsonResultS login(String code, @RequestHeader(HttpHeaders.AUTHORIZATION) WechatLoginDto dto) {
+        return userWechatService.login(code, dto);
     }
 
     /**
@@ -114,9 +114,9 @@ public class UserWechatController extends BaseController {
      * @param code 小程序code
      * @return
      */
-    @GetMapping("/get_bind/{code}")
-    public JsonResultS bind(@PathVariable("code") String code) {
-        return userWechatService.getBind(code);
+    @GetMapping("/obtain/{code}")
+    public JsonResultS obtain(@PathVariable("code") String code) {
+        return userWechatService.obtain(code);
     }
 
 }

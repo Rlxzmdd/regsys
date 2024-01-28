@@ -4,6 +4,9 @@ import have.somuch.regsys.api.common.utils.JwtUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+/**
+ * token转换为凭证Dto
+ */
 @Data
 @Accessors(chain = true)
 public class AuthToken2CredentialDto {

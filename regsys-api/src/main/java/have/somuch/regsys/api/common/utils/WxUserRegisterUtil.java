@@ -1,6 +1,6 @@
 package have.somuch.regsys.api.common.utils;
 
-import have.somuch.regsys.api.common.constant.constant.Constant;
+import have.somuch.regsys.api.common.constant.Constant;
 import have.somuch.regsys.api.common.dto.WechatProgramIdentityDto;
 import have.somuch.regsys.common.utils.RedisUtils;
 import lombok.Data;

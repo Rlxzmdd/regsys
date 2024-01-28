@@ -1,4 +1,4 @@
-use regsys_admin;
+use regsys_api;
 
 ### 学院信息表
 drop table if exists entity_college;

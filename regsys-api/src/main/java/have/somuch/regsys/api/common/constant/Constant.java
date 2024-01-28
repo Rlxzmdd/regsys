@@ -1,4 +1,4 @@
-package have.somuch.regsys.api.common.constant.constant;
+package have.somuch.regsys.api.common.constant;
 
 public class Constant {
     /*Token 用户ID Key*/

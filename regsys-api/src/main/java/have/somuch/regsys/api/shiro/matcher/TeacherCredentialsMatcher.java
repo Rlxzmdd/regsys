@@ -1,6 +1,6 @@
 package have.somuch.regsys.api.shiro.matcher;
 
-import have.somuch.regsys.api.shiro.token.WechatTeacherUserToken;
+import have.somuch.regsys.api.shiro.token.NumberToken;
 import have.somuch.regsys.common.utils.CommonUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -28,7 +28,7 @@ public class TeacherCredentialsMatcher extends SimpleCredentialsMatcher {
      */
     @Override
     public boolean doCredentialsMatch(AuthenticationToken token, AuthenticationInfo info) {
-        WechatTeacherUserToken userToken = (WechatTeacherUserToken) token;
+        NumberToken userToken = (NumberToken) token;
         Object accountCredentials = getCredentials(info);
         // 用户提交的密码
         String formCredentials = String.valueOf(userToken.getCredentials());

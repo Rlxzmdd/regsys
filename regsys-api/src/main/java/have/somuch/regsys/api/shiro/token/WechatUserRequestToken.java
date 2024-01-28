@@ -2,10 +2,13 @@ package have.somuch.regsys.api.shiro.token;
 
 import org.apache.shiro.authc.AuthenticationToken;
 
+/**
+ * @author iszhous
+ */
 public class WechatUserRequestToken implements AuthenticationToken {
 
     /*登录Token*/
-    private String token;
+    private final String token;
 
     public WechatUserRequestToken(String token) {
         this.token = token;

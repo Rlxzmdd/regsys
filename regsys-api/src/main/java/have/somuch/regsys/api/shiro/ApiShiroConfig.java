@@ -6,8 +6,8 @@ import have.somuch.regsys.api.shiro.matcher.JwtCredentialsMatcher;
 import have.somuch.regsys.api.shiro.matcher.StudentCredentialsMatcher;
 import have.somuch.regsys.api.shiro.matcher.TeacherCredentialsMatcher;
 import have.somuch.regsys.api.shiro.realm.JwtTokenRealm;
-import have.somuch.regsys.api.shiro.realm.StudentNumberRealm;
-import have.somuch.regsys.api.shiro.realm.TeacherNumberRealm;
+import have.somuch.regsys.api.shiro.realm.StuNumberRealm;
+import have.somuch.regsys.api.shiro.realm.TchNumberRealm;
 import lombok.Data;
 import org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
@@ -48,16 +48,14 @@ public class ApiShiroConfig {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
         Map<String, String> map = new HashMap<>();
-        //登出
-        map.put("/logout", "logout");
         //对所有用户认证
         map.put("/**", "authc");
-        //登录
-        shiroFilterFactoryBean.setLoginUrl("/login");
-        //首页
-        shiroFilterFactoryBean.setSuccessUrl("/index");
+        map.put("/logout", "logout");
         //错误页面，认证不通过跳转
         shiroFilterFactoryBean.setUnauthorizedUrl("/error");
+        //绑定页
+        map.put("/wechat/bind", "anon");
+        map.put("/wechat/obtain", "anon");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
         return shiroFilterFactoryBean;
     }
@@ -70,14 +68,14 @@ public class ApiShiroConfig {
     }
 
     @Bean
-    public StudentNumberRealm studentRealm() {
-        StudentNumberRealm realm = new StudentNumberRealm();
+    public StuNumberRealm studentRealm() {
+        StuNumberRealm realm = new StuNumberRealm();
         realm.setCredentialsMatcher(new StudentCredentialsMatcher());
         return realm;
     }
     @Bean
-    public TeacherNumberRealm teacherRealm() {
-        TeacherNumberRealm teacherRealm = new TeacherNumberRealm();
+    public TchNumberRealm teacherRealm() {
+        TchNumberRealm teacherRealm = new TchNumberRealm();
         teacherRealm.setCredentialsMatcher(new TeacherCredentialsMatcher(secretKey));
         return teacherRealm;
     }

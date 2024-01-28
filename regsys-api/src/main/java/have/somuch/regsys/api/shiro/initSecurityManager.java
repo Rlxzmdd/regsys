@@ -8,7 +8,6 @@ import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.realm.Realm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +35,13 @@ public class initSecurityManager implements CommandLineRunner {
     private RealmAuthorizer realmAuthorizer;
 
     @Autowired
-    private StudentNumberRealm studentRealm;
+    private StuExamRealm stuExamRealm;
+    @Autowired
+    private StuNumberRealm studentRealm;
+    @Autowired
+    private TchNumberRealm teacherRealm;
+    @Autowired
+    private JwtTokenRealm jwtTokenRealm;
 
 //    @Autowired
 //    private WechatStudentALRealm studentALRealm;
@@ -44,11 +49,7 @@ public class initSecurityManager implements CommandLineRunner {
 //    @Autowired
 //    private MyShiroRealm myShiroRealm;
 
-    @Autowired
-    private JwtTokenRealm jwtTokenRealm;
 
-    @Autowired
-    private TeacherNumberRealm teacherRealm;
 
 //    @Autowired
 //    private WechatStudentExamRealm studentExamRealm;
@@ -57,6 +58,7 @@ public class initSecurityManager implements CommandLineRunner {
     public void run(String... args) {
         // 注入Realm 到 Shiro SecurityManager 中
         List<Realm> realmList = new ArrayList<>();
+        realmList.add(stuExamRealm);
         realmList.add(studentRealm);
         realmList.add(teacherRealm);
         realmList.add(jwtTokenRealm);

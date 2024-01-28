@@ -1,17 +1,19 @@
 package have.somuch.regsys.api.user.service.impl;
 
 import cn.hutool.core.convert.Convert;
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import have.somuch.regsys.api.common.ResultCodeEnum;
-import have.somuch.regsys.api.common.constant.constant.Constant;
-import have.somuch.regsys.api.common.dto.AuthToken2CredentialDto;
+import have.somuch.regsys.api.common.constant.Constant;
 import have.somuch.regsys.api.common.dto.WechatProgramIdentityDto;
 import have.somuch.regsys.api.common.utils.JsonResultS;
 import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.common.utils.WxUserRegisterUtil;
+import have.somuch.regsys.api.shiro.token.NumberToken;
+import have.somuch.regsys.api.shiro.token.StuExamToken;
+import have.somuch.regsys.api.user.LoginType;
+import have.somuch.regsys.api.user.dto.WechatLoginDto;
 import have.somuch.regsys.api.user.entity.UserStudent;
 import have.somuch.regsys.api.user.entity.UserTeacher;
 import have.somuch.regsys.api.user.entity.UserWechat;
@@ -20,14 +22,17 @@ import have.somuch.regsys.api.user.mapper.UserTeacherMapper;
 import have.somuch.regsys.api.user.mapper.UserWechatMapper;
 import have.somuch.regsys.api.user.query.UserWechatQuery;
 import have.somuch.regsys.api.user.service.IUserWechatService;
-import have.somuch.regsys.common.common.BaseQuery;
-import have.somuch.regsys.common.common.BaseServiceImpl;
-import have.somuch.regsys.common.utils.StringUtils;
-import have.somuch.regsys.system.utils.ShiroUtils;
 import have.somuch.regsys.api.user.vo.userwechat.UserWechatInfoVo;
 import have.somuch.regsys.api.user.vo.userwechat.UserWechatListVo;
+import have.somuch.regsys.common.common.BaseQuery;
+import have.somuch.regsys.common.common.BaseServiceImpl;
 import have.somuch.regsys.common.utils.DateUtils;
 import have.somuch.regsys.common.utils.JsonResult;
+import have.somuch.regsys.common.utils.StringUtils;
+import have.somuch.regsys.system.utils.ShiroUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationToken;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,13 +43,13 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 /**
-  * <p>
-  * 用户微信表 服务类实现
-  * </p>
-  *
-  * @author isZhous
-  * @since 2024-01-25
-  */
+ * <p>
+ * 用户微信表 服务类实现
+ * </p>
+ *
+ * @author isZhous
+ * @since 2024-01-25
+ */
 @Service
 public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, UserWechat> implements IUserWechatService {
 
@@ -143,51 +148,43 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
     }
 
     @Override
-    @Transactional /*使用事务保证*/
-    public JsonResultS bind(String code, AuthToken2CredentialDto dto) {
+    @Transactional /*使用事务保证，保证数据一致，中途出错将会回滚数据*/
+    public JsonResultS login(String code, WechatLoginDto dto) {
         WechatProgramIdentityDto wxIdentity = wxUserRegisterUtil.requestCode2Session(code);
-
         if (wxIdentity == null) {
-            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0242);
+            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0402);
         }
-
-        QueryWrapper<UserWechat> wechatQueryWrapper = new QueryWrapper<>();
-        wechatQueryWrapper.eq("open_id", wxIdentity.getOpenid());
-        UserWechat wechat = wechatMapper.selectOne(wechatQueryWrapper);
-        // 如果存在源记录不会重复创建
-        if (wechat == null) {
-            wechat = new UserWechat()
-                    .setOpenId(wxIdentity.getOpenid())
-                    .setSessionKey(wxIdentity.getSessionKey())
-                    .setUnionId(wxIdentity.getUnionId());
-            wechatMapper.insert(wechat);
-        } else if (!coverBind) { // 生产环境不允许覆盖绑定
-            return JsonResultS.error(ResultCodeEnum.WECHAT_USER_IS_BIND);
+        // 获取Subject
+        Subject subject = SecurityUtils.getSubject();
+        // 根据dto的type，创建对应的Token
+        AuthenticationToken token;
+        switch (dto.getType()) {
+            case STU_NUMBER:
+            case TCH_NUMBER:
+                token = new NumberToken(dto);
+                break;
+            case EXAM_NUMBER:
+                token = new StuExamToken(dto);
+                break;
+            default:
+                return JsonResultS.error("未知的登录类型");
         }
-
-        if (Constant.TOKEN_USER_TYPE_STUDENT.equals(dto.getType())) {
-            QueryWrapper<UserStudent> wrapper = new QueryWrapper<>();
-            wrapper.eq("stu_number", dto.getNumber());
-            wrapper.eq("mark", 1);
-            UserStudent student = studentMapper.selectOne(wrapper);
-//            student.setWxId(wechat.getId());
-            studentMapper.updateById(student);
-        } else if (Constant.TOKEN_USER_TYPE_TEACHER.equals(dto.getType())) {
-            QueryWrapper<UserTeacher> wrapper = new QueryWrapper<>();
-            wrapper.eq("tch_number", dto.getNumber());
-            wrapper.eq("mark", 1);
-            UserTeacher teacher = teacherMapper.selectOne(wrapper);
-//            teacher.setWxId(wechat.getId());
-            teacherMapper.updateById(teacher);
-        } else {
-            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0305);
+        //进行登录，统一错误管理 --> GlobalExceptionHandler
+        subject.login(token);
+        // 登录成功，生成统一验证Token --> jwtUtil
+        String type = Constant.TOKEN_USER_TYPE_STUDENT;
+        if(dto.getType().equals(LoginType.TCH_NUMBER)){
+            type = Constant.TOKEN_USER_TYPE_TEACHER;
         }
-
-        return JsonResultS.success();
+        // todo 准考证登录似乎没有会number，需要复查
+        String jwtToken = jwtUtil.sign(dto.getNumber(), type);
+        return JsonResultS.success(new HashMap<String, String>() {{
+            put("authorization", jwtToken);
+        }});
     }
 
     @Override
-    public JsonResultS getBind(String code) {
+    public JsonResultS obtain(String code) {
         WechatProgramIdentityDto dto = wxUserRegisterUtil.requestCode2Session(code);
 
         if (dto == null) {
@@ -221,7 +218,7 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
             return JsonResultS.success(ResultCodeEnum.WECHAT_USER_NOT_BIND);
         }
 
-        return JsonResultS.success(new HashMap<String,String>() {{
+        return JsonResultS.success(new HashMap<String, String>() {{
             put("authorization", token);
         }});
     }

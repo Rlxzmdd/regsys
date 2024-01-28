@@ -1,7 +1,7 @@
 package have.somuch.regsys.api.shiro.realm;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import have.somuch.regsys.api.common.constant.constant.Constant;
+import have.somuch.regsys.api.common.constant.Constant;
 import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.shiro.principal.WechatProgramUserPrincipal;
 import have.somuch.regsys.api.shiro.token.WechatUserRequestToken;

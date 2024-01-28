@@ -1,6 +1,7 @@
 package have.somuch.regsys.api.shiro.realm;
 
 
+import have.somuch.regsys.api.shiro.token.StuExamToken;
 import have.somuch.regsys.api.user.entity.UserStudent;
 import have.somuch.regsys.api.user.service.IUserStudentService;
 import have.somuch.regsys.common.exception.user.CaptchaException;
@@ -13,21 +14,16 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class StudentNumberRealm extends AuthorizingRealm {
+public class StuExamRealm extends AuthorizingRealm {
 
+    // todo 检查
     @Autowired
     private IUserStudentService studentService;
 
-    /**
-     * 支持Token 适配
-     *
-     * @param token
-     * @return
-     */
-//    @Override
-//    public boolean supports(AuthenticationToken token) {
-//        return token instanceof WechatStudentUserToken;
-//    }
+    @Override
+    public boolean supports(AuthenticationToken token) {
+        return token instanceof StuExamToken;
+    }
 
     /**
      * 授权，此Realm只负责校验学号+姓名的凭据，并返回Token
@@ -51,8 +47,8 @@ public class StudentNumberRealm extends AuthorizingRealm {
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         String stuNumber = String.valueOf(authenticationToken.getPrincipal());
-        String password = String.valueOf(authenticationToken.getCredentials());
-        UserStudent UserStudent = null;// todo 查询
+        String realName = String.valueOf(authenticationToken.getCredentials());
+        UserStudent UserStudent = null;
         try {
 //            UserStudent = studentService.login(stuNumber, realName);
         } catch (CaptchaException e) {
@@ -72,8 +68,8 @@ public class StudentNumberRealm extends AuthorizingRealm {
 
         // 创建验证信息对象
         return new SimpleAuthenticationInfo(
-                stuNumber,
-                password,
+                UserStudent,
+                UserStudent.getRealName(),
                 getName()
         );
     }

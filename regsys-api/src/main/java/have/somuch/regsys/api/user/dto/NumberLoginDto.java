@@ -6,9 +6,9 @@ import lombok.Data;
  * 微信学生登录Dto
  */
 @Data
-public class WechatStudentLoginDto {
+public class NumberLoginDto {
     /*学号*/
-    private String stuNumber;
-    /*姓名*/
-    private String realName;
+    private String number;
+    /*密码*/
+    private String name;
 }
