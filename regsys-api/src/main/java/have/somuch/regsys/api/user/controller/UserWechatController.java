@@ -1,8 +1,11 @@
 package have.somuch.regsys.api.user.controller;
 
+import have.somuch.regsys.api.common.dto.AuthToken2CredentialDto;
+import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.user.entity.UserWechat;
 import have.somuch.regsys.api.user.query.UserWechatQuery;
 import have.somuch.regsys.api.user.service.IUserWechatService;
+import have.somuch.regsys.api.common.utils.JsonResultS;
 import have.somuch.regsys.common.annotation.Log;
 import have.somuch.regsys.common.common.BaseController;
 import have.somuch.regsys.common.enums.LogType;
@@ -26,6 +29,9 @@ public class UserWechatController extends BaseController {
 
     @Autowired
     private IUserWechatService userWechatService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
      * 获取数据列表
@@ -59,8 +65,8 @@ public class UserWechatController extends BaseController {
      * @return
      */
     @GetMapping("/info/{userwechatId}")
-    public JsonResult info(@PathVariable("userwechatId") Integer userwechatId) {
-        return userWechatService.info(userwechatId);
+    public JsonResult info(@PathVariable("userwechatId") Integer userWechatId) {
+        return userWechatService.info(userWechatId);
     }
 
     /**
@@ -99,7 +105,7 @@ public class UserWechatController extends BaseController {
     @PostMapping("/bind")
     public JsonResultS bind(String code, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         AuthToken2CredentialDto dto = AuthToken2CredentialDto.create(jwtUtil, token);
-        return wechatService.bind(code, dto );
+        return userWechatService.bind(code, dto );
     }
 
     /**
@@ -110,7 +116,7 @@ public class UserWechatController extends BaseController {
      */
     @GetMapping("/get_bind/{code}")
     public JsonResultS bind(@PathVariable("code") String code) {
-        return wechatService.getBind(code);
+        return userWechatService.getBind(code);
     }
 
 }

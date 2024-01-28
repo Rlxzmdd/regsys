@@ -1,6 +1,6 @@
 package have.somuch.regsys.api.common.dto;
 
-import have.somuch.regsys.common.utils.JwtUtil;
+import have.somuch.regsys.api.common.utils.JwtUtil;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

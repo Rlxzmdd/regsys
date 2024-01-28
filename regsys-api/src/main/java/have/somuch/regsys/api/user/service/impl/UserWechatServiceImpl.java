@@ -1,10 +1,22 @@
 package have.somuch.regsys.api.user.service.impl;
 
 import cn.hutool.core.convert.Convert;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import have.somuch.regsys.api.common.ResultCodeEnum;
+import have.somuch.regsys.api.common.constant.constant.Constant;
+import have.somuch.regsys.api.common.dto.AuthToken2CredentialDto;
+import have.somuch.regsys.api.common.dto.WechatProgramIdentityDto;
+import have.somuch.regsys.api.common.utils.JsonResultS;
+import have.somuch.regsys.api.common.utils.JwtUtil;
+import have.somuch.regsys.api.common.utils.WxUserRegisterUtil;
+import have.somuch.regsys.api.user.entity.UserStudent;
+import have.somuch.regsys.api.user.entity.UserTeacher;
 import have.somuch.regsys.api.user.entity.UserWechat;
+import have.somuch.regsys.api.user.mapper.UserStudentMapper;
+import have.somuch.regsys.api.user.mapper.UserTeacherMapper;
 import have.somuch.regsys.api.user.mapper.UserWechatMapper;
 import have.somuch.regsys.api.user.query.UserWechatQuery;
 import have.somuch.regsys.api.user.service.IUserWechatService;
@@ -18,9 +30,12 @@ import have.somuch.regsys.common.utils.DateUtils;
 import have.somuch.regsys.common.utils.JsonResult;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 /**
   * <p>
@@ -32,6 +47,25 @@ import java.io.Serializable;
   */
 @Service
 public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, UserWechat> implements IUserWechatService {
+
+    /*是否允许覆盖绑定 ，开发环境下允许*/
+    @Value("${wechat.program.coverBind}")
+    private boolean coverBind;
+
+    @Autowired
+    private UserWechatMapper wechatMapper;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private WxUserRegisterUtil wxUserRegisterUtil;
+
+    @Autowired
+    private UserStudentMapper studentMapper;
+
+    @Autowired
+    private UserTeacherMapper teacherMapper;
 
     @Autowired
     private UserWechatMapper userWechatMapper;
@@ -108,4 +142,87 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
         return super.delete(entity);
     }
 
+    @Override
+    @Transactional /*使用事务保证*/
+    public JsonResultS bind(String code, AuthToken2CredentialDto dto) {
+        WechatProgramIdentityDto wxIdentity = wxUserRegisterUtil.requestCode2Session(code);
+
+        if (wxIdentity == null) {
+            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0242);
+        }
+
+        QueryWrapper<UserWechat> wechatQueryWrapper = new QueryWrapper<>();
+        wechatQueryWrapper.eq("open_id", wxIdentity.getOpenid());
+        UserWechat wechat = wechatMapper.selectOne(wechatQueryWrapper);
+        // 如果存在源记录不会重复创建
+        if (wechat == null) {
+            wechat = new UserWechat()
+                    .setOpenId(wxIdentity.getOpenid())
+                    .setSessionKey(wxIdentity.getSessionKey())
+                    .setUnionId(wxIdentity.getUnionId());
+            wechatMapper.insert(wechat);
+        } else if (!coverBind) { // 生产环境不允许覆盖绑定
+            return JsonResultS.error(ResultCodeEnum.WECHAT_USER_IS_BIND);
+        }
+
+        if (Constant.TOKEN_USER_TYPE_STUDENT.equals(dto.getType())) {
+            QueryWrapper<UserStudent> wrapper = new QueryWrapper<>();
+            wrapper.eq("stu_number", dto.getNumber());
+            wrapper.eq("mark", 1);
+            UserStudent student = studentMapper.selectOne(wrapper);
+//            student.setWxId(wechat.getId());
+            studentMapper.updateById(student);
+        } else if (Constant.TOKEN_USER_TYPE_TEACHER.equals(dto.getType())) {
+            QueryWrapper<UserTeacher> wrapper = new QueryWrapper<>();
+            wrapper.eq("tch_number", dto.getNumber());
+            wrapper.eq("mark", 1);
+            UserTeacher teacher = teacherMapper.selectOne(wrapper);
+//            teacher.setWxId(wechat.getId());
+            teacherMapper.updateById(teacher);
+        } else {
+            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0305);
+        }
+
+        return JsonResultS.success();
+    }
+
+    @Override
+    public JsonResultS getBind(String code) {
+        WechatProgramIdentityDto dto = wxUserRegisterUtil.requestCode2Session(code);
+
+        if (dto == null) {
+            return JsonResultS.error(ResultCodeEnum.USER_ERROR_A0242);
+        }
+        QueryWrapper<UserWechat> wrapper = new QueryWrapper<>();
+        wrapper.eq("open_id", dto.getOpenid());
+        UserWechat wechat = wechatMapper.selectOne(wrapper);
+        String token;
+        // 微信用户未绑定情况
+        if (wechat == null) {
+            return JsonResultS.success(ResultCodeEnum.WECHAT_USER_NOT_BIND);
+        }
+        QueryWrapper<UserStudent> studentQueryWrapper = new QueryWrapper<>();
+        studentQueryWrapper.eq("wx_id", wechat.getId());
+        UserStudent student = studentMapper.selectOne(studentQueryWrapper);
+        if (student == null) {
+            QueryWrapper<UserTeacher> teacherQueryWrapper = new QueryWrapper<>();
+            teacherQueryWrapper.eq("wx_id", wechat.getId());
+            UserTeacher teacher = teacherMapper.selectOne(teacherQueryWrapper);
+            if (teacher == null) {
+                return JsonResultS.error(ResultCodeEnum.WECHAT_USER_NOT_BIND);
+            }
+            token = jwtUtil.sign(teacher.getTchNumber(), Constant.TOKEN_USER_TYPE_TEACHER);
+        } else {
+            token = jwtUtil.sign(student.getStuNumber(), Constant.TOKEN_USER_TYPE_STUDENT);
+        }
+
+        // 均未找到微信绑定信息
+        if (token == null) {
+            return JsonResultS.success(ResultCodeEnum.WECHAT_USER_NOT_BIND);
+        }
+
+        return JsonResultS.success(new HashMap<String,String>() {{
+            put("authorization", token);
+        }});
+    }
 }
