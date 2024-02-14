@@ -1,14 +1,13 @@
 package have.somuch.regsys.api.user.service.impl;
 
 import have.somuch.regsys.api.common.constant.Constant;
+import have.somuch.regsys.api.common.constant.LoginTypeEnum;
 import have.somuch.regsys.api.common.dto.WechatProgramIdentityDto;
 import have.somuch.regsys.api.common.utils.JsonResultS;
 import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.common.utils.WxUserRegisterUtil;
 import have.somuch.regsys.api.shiro.realm.JwtTokenRealm;
 import have.somuch.regsys.api.shiro.realm.StuNumberRealm;
-import have.somuch.regsys.api.shiro.realm.TchNumberRealm;
-import have.somuch.regsys.api.user.LoginType;
 import have.somuch.regsys.api.user.dto.WechatLoginDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
@@ -47,7 +46,7 @@ class UserWechatServiceImplTest {
         DefaultSecurityManager defaultSecurityManager = new DefaultSecurityManager();
         defaultSecurityManager.setRealm(new JwtTokenRealm());
         defaultSecurityManager.setRealm(new StuNumberRealm());
-        defaultSecurityManager.setRealm(new TchNumberRealm());
+//        defaultSecurityManager.setRealm(new TchNumberRealm());
         //2.设置SecurityManager到运行环境中
         SecurityUtils.setSecurityManager(defaultSecurityManager);
     }
@@ -59,7 +58,7 @@ class UserWechatServiceImplTest {
     void testLogin() {
         String code = "qweqwe";
         WechatLoginDto dto = new WechatLoginDto();
-        dto.setType(LoginType.STU_NUMBER);
+        dto.setType(LoginTypeEnum.STU_NUMBER);
         dto.setNumber("S2021001");
         dto.setPassword("123123");
 
@@ -77,11 +76,12 @@ class UserWechatServiceImplTest {
 
         assertEquals(jwtToken, ((Map<String, String>) result.getData()).get("authorization"));
     }
+
     @Test
     public void testLogin_Success() {
         String code = "testCode";
         WechatLoginDto dto = new WechatLoginDto();
-        dto.setType(LoginType.STU_NUMBER);
+        dto.setType(LoginTypeEnum.STU_NUMBER);
         dto.setNumber("S2021001");
         dto.setPassword("123123");
 
@@ -100,11 +100,12 @@ class UserWechatServiceImplTest {
         Assertions.assertEquals(JsonResultS.SUCCESS.getCode(), result.getCode());
         Assertions.assertEquals("{authorization=testToken}", result.getData().toString());
     }
+
     @Test
     public void testLogin_UnknownLoginType() {
         String code = "testCode";
         WechatLoginDto dto = new WechatLoginDto();
-        dto.setType(LoginType.UNKNOWN);
+        dto.setType(LoginTypeEnum.UNKNOWN);
 
         WechatProgramIdentityDto wxIdentity = new WechatProgramIdentityDto();
         wxIdentity.setUnionId("oltZs5EQE7YXXmt-tq55uTMYafAk");
@@ -124,7 +125,7 @@ class UserWechatServiceImplTest {
     public void testLogin_NullWechatIdentity() {
         String code = "testCode";
         WechatLoginDto dto = new WechatLoginDto();
-        dto.setType(LoginType.STU_NUMBER);
+        dto.setType(LoginTypeEnum.STU_NUMBER);
         dto.setNumber("testNumber");
 
         when(wxUserRegisterUtil.requestCode2Session(code)).thenReturn(null);

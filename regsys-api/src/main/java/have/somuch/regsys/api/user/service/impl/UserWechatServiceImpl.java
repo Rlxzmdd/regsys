@@ -4,15 +4,15 @@ import cn.hutool.core.convert.Convert;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import have.somuch.regsys.api.common.ResultCodeEnum;
 import have.somuch.regsys.api.common.constant.Constant;
+import have.somuch.regsys.api.common.constant.LoginTypeEnum;
+import have.somuch.regsys.api.common.constant.ResultCodeEnum;
 import have.somuch.regsys.api.common.dto.WechatProgramIdentityDto;
 import have.somuch.regsys.api.common.utils.JsonResultS;
 import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.common.utils.WxUserRegisterUtil;
 import have.somuch.regsys.api.shiro.token.NumberToken;
 import have.somuch.regsys.api.shiro.token.StuExamToken;
-import have.somuch.regsys.api.user.LoginType;
 import have.somuch.regsys.api.user.dto.WechatLoginDto;
 import have.somuch.regsys.api.user.entity.UserStudent;
 import have.somuch.regsys.api.user.entity.UserTeacher;
@@ -148,7 +148,8 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
     }
 
     @Override
-    @Transactional /*使用事务保证，保证数据一致，中途出错将会回滚数据*/
+    @Transactional
+    /*使用事务保证，保证数据一致，中途出错将会回滚数据*/
     public JsonResultS login(String code, WechatLoginDto dto) {
         WechatProgramIdentityDto wxIdentity = wxUserRegisterUtil.requestCode2Session(code);
         if (wxIdentity == null) {
@@ -173,12 +174,11 @@ public class UserWechatServiceImpl extends BaseServiceImpl<UserWechatMapper, Use
         subject.login(token);
         // 登录成功，生成统一验证Token --> jwtUtil
         String type = Constant.TOKEN_USER_TYPE_STUDENT;
-        if(dto.getType().equals(LoginType.TCH_NUMBER)){
+        if (dto.getType().equals(LoginTypeEnum.TCH_NUMBER)) {
             type = Constant.TOKEN_USER_TYPE_TEACHER;
         }
-        // todo 准考证登录似乎没有会number，需要复查
+        // fixme 准考证登录似乎没有会number，需要复查
         String jwtToken = jwtUtil.sign(dto.getNumber(), type);
-        // todo token为null
         return JsonResultS.success(new HashMap<String, String>() {{
             put("authorization", jwtToken);
         }});

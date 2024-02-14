@@ -1,12 +1,13 @@
 spring:
   profiles:
-    active: @package.environment@
+    active: local
+#    active: @package.environment@
 
   # 服务模块
   devtools:
     restart:
       # 热部署开关
-      enabled: false
+      enabled: true
 
   # 自定义国际化配置
   messages:

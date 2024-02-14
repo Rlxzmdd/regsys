@@ -4,8 +4,8 @@ import have.somuch.regsys.api.shiro.auth.CustomModularRealmAuthenticator;
 import have.somuch.regsys.api.shiro.auth.RealmAuthorizer;
 import have.somuch.regsys.api.shiro.matcher.JwtCredentialsMatcher;
 import have.somuch.regsys.api.shiro.matcher.StudentCredentialsMatcher;
-import have.somuch.regsys.api.shiro.matcher.TeacherCredentialsMatcher;
 import have.somuch.regsys.api.shiro.realm.JwtTokenRealm;
+import have.somuch.regsys.api.shiro.realm.StuExamRealm;
 import have.somuch.regsys.api.shiro.realm.StuNumberRealm;
 import have.somuch.regsys.api.shiro.realm.TchNumberRealm;
 import lombok.Data;
@@ -68,17 +68,26 @@ public class ApiShiroConfig {
     }
 
     @Bean
-    public StuNumberRealm studentRealm() {
+    public StuExamRealm stuExamRealm() {
+        StuExamRealm realm = new StuExamRealm();
+        realm.setCredentialsMatcher(new StudentCredentialsMatcher());
+        return realm;
+    }
+
+    @Bean
+    public StuNumberRealm stuNumberRealm() {
         StuNumberRealm realm = new StuNumberRealm();
         realm.setCredentialsMatcher(new StudentCredentialsMatcher());
         return realm;
     }
+
     @Bean
-    public TchNumberRealm teacherRealm() {
-        TchNumberRealm teacherRealm = new TchNumberRealm();
-        teacherRealm.setCredentialsMatcher(new TeacherCredentialsMatcher(secretKey));
-        return teacherRealm;
+    public TchNumberRealm tchNumberRealm() {
+        TchNumberRealm realm = new TchNumberRealm();
+        realm.setCredentialsMatcher(new StudentCredentialsMatcher());
+        return realm;
     }
+
     @Bean
     public JwtTokenRealm jwtTokenRealm() {
         JwtTokenRealm realm = new JwtTokenRealm();
@@ -86,6 +95,7 @@ public class ApiShiroConfig {
         realm.setCredentialsMatcher(new JwtCredentialsMatcher());
         return realm;
     }
+
     @Bean
     public RealmAuthorizer realmAuthorizer() {
         return new RealmAuthorizer();

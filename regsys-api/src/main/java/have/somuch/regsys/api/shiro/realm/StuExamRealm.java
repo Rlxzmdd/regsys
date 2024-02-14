@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Slf4j
 public class StuExamRealm extends AuthorizingRealm {
 
-    // todo 检查
+    // todo 编写考生号登录
     @Autowired
     private IUserStudentService studentService;
 

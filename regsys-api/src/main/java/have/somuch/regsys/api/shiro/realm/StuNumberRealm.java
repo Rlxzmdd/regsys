@@ -42,15 +42,9 @@ public class StuNumberRealm extends AuthorizingRealm {
         return null;
     }
 
-    /**
-     * 认证
-     *
-     * @param authenticationToken
-     * @return
-     * @throws AuthenticationException
-     */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+        // 进行身份认证
         String stuNumber = String.valueOf(authenticationToken.getPrincipal());
         String realName = String.valueOf(authenticationToken.getCredentials());
         UserStudent UserStudent = null;

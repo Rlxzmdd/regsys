@@ -1,6 +1,6 @@
-package have.somuch.regsys.api.user;
+package have.somuch.regsys.api.common.constant;
 
-public enum LoginType {
+public enum LoginTypeEnum {
     /**
      * 学生学号登录,number、password
      */

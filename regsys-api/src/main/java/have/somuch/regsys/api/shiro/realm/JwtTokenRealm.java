@@ -2,6 +2,7 @@ package have.somuch.regsys.api.shiro.realm;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import have.somuch.regsys.api.common.constant.Constant;
+import have.somuch.regsys.api.common.constant.ResultCodeEnum;
 import have.somuch.regsys.api.common.utils.JwtUtil;
 import have.somuch.regsys.api.shiro.principal.WechatProgramUserPrincipal;
 import have.somuch.regsys.api.shiro.token.WechatUserRequestToken;
@@ -9,7 +10,6 @@ import have.somuch.regsys.api.user.entity.UserStudent;
 import have.somuch.regsys.api.user.entity.UserTeacher;
 import have.somuch.regsys.api.user.service.IUserStudentService;
 import have.somuch.regsys.api.user.service.IUserTeacherService;
-import have.somuch.regsys.api.common.ResultCodeEnum;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -28,10 +28,6 @@ public class JwtTokenRealm extends AuthorizingRealm {
 
     @Autowired
     private IUserTeacherService teacherService;
-
-    // 用于管理权限
-//    @Autowired
-//    private WechatMiniProgramRoleMapper wechatMiniProgramRoleMapper;
 
     @Override
     public boolean supports(AuthenticationToken token) {

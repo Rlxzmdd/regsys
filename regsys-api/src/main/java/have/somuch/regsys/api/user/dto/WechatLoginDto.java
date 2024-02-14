@@ -1,6 +1,6 @@
 package have.somuch.regsys.api.user.dto;
 
-import have.somuch.regsys.api.user.LoginType;
+import have.somuch.regsys.api.common.constant.LoginTypeEnum;
 import have.somuch.regsys.api.user.service.IUserStudentService;
 import have.somuch.regsys.api.user.service.IUserTeacherService;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class WechatLoginDto {
 
     @Getter
     @Setter
-    private LoginType type;
+    private LoginTypeEnum type;
 
     @Getter
     @Setter

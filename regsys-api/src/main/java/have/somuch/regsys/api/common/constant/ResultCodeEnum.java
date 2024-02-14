@@ -1,4 +1,4 @@
-package have.somuch.regsys.api.common;
+package have.somuch.regsys.api.common.constant;
 
 
 /**

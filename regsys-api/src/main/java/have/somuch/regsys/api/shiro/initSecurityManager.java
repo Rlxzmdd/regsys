@@ -1,7 +1,10 @@
 package have.somuch.regsys.api.shiro;
 
 import have.somuch.regsys.api.shiro.auth.RealmAuthorizer;
-import have.somuch.regsys.api.shiro.realm.*;
+import have.somuch.regsys.api.shiro.realm.JwtTokenRealm;
+import have.somuch.regsys.api.shiro.realm.StuExamRealm;
+import have.somuch.regsys.api.shiro.realm.StuNumberRealm;
+import have.somuch.regsys.api.shiro.realm.TchNumberRealm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.pam.ModularRealmAuthenticator;
 import org.apache.shiro.mgt.SecurityManager;
@@ -18,6 +21,7 @@ import java.util.List;
 /**
  * 在Bean 加载完成后获取Shiro securityManager 注入registration 模块中自定义的realm
  * run() 方法在Bean 加载完成后自动执行
+ *
  * @author Cheney
  */
 
@@ -37,30 +41,20 @@ public class initSecurityManager implements CommandLineRunner {
     @Autowired
     private StuExamRealm stuExamRealm;
     @Autowired
-    private StuNumberRealm studentRealm;
+    private StuNumberRealm stuNumberRealm;
     @Autowired
-    private TchNumberRealm teacherRealm;
+    private TchNumberRealm tchNumberRealm;
     @Autowired
     private JwtTokenRealm jwtTokenRealm;
 
-//    @Autowired
-//    private WechatStudentALRealm studentALRealm;
-//
-//    @Autowired
-//    private MyShiroRealm myShiroRealm;
-
-
-
-//    @Autowired
-//    private WechatStudentExamRealm studentExamRealm;
 
     @Override
     public void run(String... args) {
         // 注入Realm 到 Shiro SecurityManager 中
         List<Realm> realmList = new ArrayList<>();
         realmList.add(stuExamRealm);
-        realmList.add(studentRealm);
-        realmList.add(teacherRealm);
+        realmList.add(stuNumberRealm);
+        realmList.add(tchNumberRealm);
         realmList.add(jwtTokenRealm);
         realmAuthorizer.setRealms(realmList);
 
